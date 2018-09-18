@@ -9,7 +9,7 @@ class UserTest(unittest.TestCase):
     def test_getName(self):
         self.assertEqual("pedro", user.getName())
 
-    def getStatus(self):
+    def test_getStatus(self):
         self.assertEqual("ACTIVE", user.getStatus())
 
     def test_setName(self):
@@ -20,7 +20,7 @@ class UserTest(unittest.TestCase):
         user.setStatus("AWAY")
         self.assertEqual("AWAY", user.getStatus())
 
-    def getClientSocket(self):
+    def test_getClientSocket(self):
         self.assertEqual(socket, user.getClientSocket())
 
 

@@ -42,10 +42,11 @@ class Server:
         with self.socket as s:
             s.close()
             print("Server has been closed")
+
         
     def client_thread(self, curr_client_socket, add):
         i=0
-
+        idd = False
         curr_status = None
         curr_username = None
         while True:
@@ -53,42 +54,49 @@ class Server:
             message = message.decode()
             message_words = message.split()
             curr_user = User(curr_username, curr_status, curr_client_socket)
-            self.addConnectedUser(curr_user)
 
-            if (i==0 and curr_username == None):
-                curr_client_socket.send(b"Identificate")
-            elif(message_words[0] == "IDENTIFY"):
+            if(message_words[0] == "IDENTIFY"):
                 curr_username = message_words[1]
-                curr_user.setName(curr_username)
-                self.broadcast([curr_user], "Te has idenfiticado")
+                if not idd:
+                    curr_user.setName(curr_username)
+                    self.broadcast([curr_user], "Te has idenfiticado")
+                    self.addConnectedUser(curr_user)
+                idd = True
+            elif(i==0 and not idd):
+                curr_client_socket.send(b"Identificate")
 
-            elif(message_words[0] == "STATUS"):
+            elif(message_words[0] == "STATUS" and idd):
                 curr_status = message_words[1]
                 curr_user.setStatus(curr_status)
                 self.broadcast(curr_client_socket, "Tu status ha cambiado")
 
-            elif(message_words[0] == "USERS"):
+            elif(message_words[0] == "USERS" and idd):
                 print("USERS")
                 msg = ''
                 for user in self.conn_users:
                     msg = msg + ' ' + user.getName()
                 self.broadcast([curr_user], msg)
 
-            elif(message_words[0] == "CREATEROOM"):
+            elif(message_words[0] == "CREATEROOM" and idd):
                 room = Chatroom(message_words[1], curr_user)
                 self.chatroom_list.append(room)
                 room.addToConfirmedList(curr_user)
 
-            elif(message_words[0] == "INVITE"):
+            elif(message_words[0] == "INVITE" and idd ):
                 curr_chatroom = None
                 for chatroom in self.chatroom_list:
                     encontrado = False
                     if (chatroom.getRoomName() == message_words[1]):
                         encontrado = True
                         curr_chatroom = chatroom
+                if curr_chatroom.getOwner().getName() != curr_username:
+                    mess = "Solo el propietario de la sala puede invitar a otros usuarios"
+                    curr_client_socket.send(mess.encode())
+                    continue
                 if (encontrado == False):
                     msg = "La sala %s no existe" % message_words[1]
                     curr_client_socket.send(msg.encode())
+                    continue
                 for invi_username in message_words[2:]:
                     for users in self.conn_users:
                         if (users.getName() == invi_username):
@@ -96,31 +104,35 @@ class Server:
                             msg = "Has sido invitado a %s" % curr_chatroom.getRoomName()
                             self.broadcast([users], msg)
 
-            elif (message_words[0] == "PUBLICMESSAGE"):
+            elif (message_words[0] == "PUBLICMESSAGE" and idd):
                 print("public message")
                 self.broadcast(self.conn_users, self.concat_list_into_str(message_words[1:]))
 
-            elif(message_words[0] == "ROOMESSAGE" or message_words[0] == "MESSAGE"):
+            elif idd and (message_words[0] == "ROOMESSAGE" or message_words[0] == "MESSAGE"):
                 receiver_list = self.receiver_det(message_words[0], message_words[1])
                 if message_words[0] != "MESSAGE" and curr_user in receiver_list:
                     receiver_list.remove(curr_user)
-                self.broadcast(receiver_list,   self.concat_list_into_str(message_words[2:]))
+                self.broadcast(receiver_list, curr_username + ': ' + self.concat_list_into_str(message_words[2:]))
 
             elif (message_words[0] == "DISCONNECT"):
                 curr_client_socket.close()
                 self.conn_users.remove(curr_user)
                 break
 
-            elif (message_words[0] == "JOINROOM"):
+            elif (message_words[0] == "JOINROOM" and idd):
+                addable_to_confirmlist = False
                 for chatrooms in self.chatroom_list:
                     if (chatrooms.getRoomName() == message_words[1]):
-                        addable_to_confirmlist = False
                         for users in chatrooms.getWaitList():
                             if (users.getName() == curr_username):
                                 chatrooms.moveUserfromWaitlistToConfirmedlist(users)
-                        self.broadcast(self.receiver_det("ROOMESSAGE",chatrooms),"%s se ha unido a esta sala" %curr_username)
+                                addable_to_confirmlist = True
+                                self.broadcast(self.receiver_det("ROOMESSAGE",chatrooms),"%s se ha unido a esta sala" %curr_username)
+                if not addable_to_confirmlist:
+                    self.broadcast([curr_user], "No te puedes unir a esta sala")
             else:
-                self.broadcast([curr_user], b"Eso no es parte del protocolo")
+                val_msg = b"PUBLICMESSAGE, MESSAGE, ROOMESSAGE, JOINROOM, CREATEROOM, DISCONNECT, IDENTIFY, INVITE, STATUS, USERS"
+                self.broadcast([curr_user], b"No te has identificado o eso no es parte del protocolo. Mensajes validos: %b " %val_msg)
             i+=1
 
     '''Determines who a message gonna be sent to based on protocol messages'''
@@ -167,7 +179,7 @@ class Server:
 
         
 if __name__ == '__main__':
-    server = Server(('192.168.25.87',1235))
+    server = Server(('192.168.1.64',1235))
     server.client_thread_admin(100)
 
     print("Todo bien")
