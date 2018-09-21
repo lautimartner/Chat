@@ -49,18 +49,18 @@ class Client:
 
     def sendPriMessage(self, message):
         message = message.split()
-        fin_mess = "MESSAGE " + self.concat_list_into_str(message[0:])
+        fin_mess = "MESSAGE " + self.concat_list_into_str(message)
         return fin_mess
 
     
     def sendPubMessage(self, message):
         split_mess = message.split()
-        fin_mess = "PUBLICMESSAGE " + self.concat_list_into_str(split_mess[0:])
+        fin_mess = "PUBLICMESSAGE " + self.concat_list_into_str(split_mess)
         return fin_mess
 
     def sendRoomMess(self, message):
         message = message.split()
-        fin_mess =  "ROOMESSAGE " + self.concat_list_into_str(message[0:])
+        fin_mess =  "ROOMESSAGE " + self.concat_list_into_str(message)
         return fin_mess
 
     def input_manager(self):
@@ -74,7 +74,7 @@ class Client:
                         message = self.socket.recv(2048)
                         if not message:
                             conn = False
-                        print ("\n server :" + message.decode())
+                        print ("\nserver: " + message.decode())
                     else:
                         msg = sys.stdin.readline()
                         mess = msg.split()
@@ -82,14 +82,14 @@ class Client:
                             conn = False
                             self.socket.close()
                         else:
-                            self.socket.send(self.messageManager(msg.encode()))
+                            self.socket.send(self.messageManager(msg).encode())
                             sys.stdout.flush()
         except:
             print ("Te has desconectado")
 
     """Translates short strings into protocol messages and sends it to the server"""
     def messageManager(self, prot_message):
-        trans = prot_message.decode().split()
+        trans = prot_message.split()
         if trans[0] == "id":
             fin_mess = "IDENTIFY " + trans[1]
         elif trans[0] == "s":
@@ -107,12 +107,12 @@ class Client:
         elif trans[0] == "i":
             fin_mess = "INVITE " + self.concat_list_into_str(trans[1:])
         elif trans[0] == "j":
-            fin_mess = "JOINROOM " + self.concat_list_into_str(trans[1])
+            fin_mess = "JOINROOM " + trans[1]
         elif trans[0] == "d":
             fin_mess = "DISCONNECT"
         else:
             fin_mess = "Mensaje invalido"
-        return fin_mess.encode()
+        return fin_mess
 
 if __name__ == '__main__':
     client = Client(None,None,None)
