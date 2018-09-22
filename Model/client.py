@@ -9,6 +9,7 @@ class Client:
             self.socket = sockets
         self.user = user
         self.address = serv_address
+        self.listeners = []
 
         
     def getAddress(self):
@@ -52,7 +53,8 @@ class Client:
         fin_mess = "MESSAGE " + self.concat_list_into_str(message)
         return fin_mess
 
-    
+    def commands(self):
+        str = "Estos son los comandos para usar este chat:"
     def sendPubMessage(self, message):
         split_mess = message.split()
         fin_mess = "PUBLICMESSAGE " + self.concat_list_into_str(split_mess)
@@ -72,20 +74,20 @@ class Client:
                 for csocket in read_sockets:
                     if csocket == self.socket:
                         message = self.socket.recv(2048)
+                        msg = message.decode()
                         if not message:
                             conn = False
-                        print ("\nserver: " + message.decode())
-                    else:
-                        msg = sys.stdin.readline()
-                        mess = msg.split()
-                        if msg== "d":
-                            conn = False
-                            self.socket.close()
                         else:
-                            self.socket.send(self.messageManager(msg).encode())
-                            sys.stdout.flush()
+
+                            self.update(msg)
+                            if msg== "d":
+                                conn = False
+                                self.socket.send("DISCONNECT")
+
+
         except:
             print ("Te has desconectado")
+            self.socket.close()
 
     """Translates short strings into protocol messages and sends it to the server"""
     def messageManager(self, prot_message):
@@ -110,13 +112,19 @@ class Client:
             fin_mess = "JOINROOM " + trans[1]
         elif trans[0] == "d":
             fin_mess = "DISCONNECT"
+
         else:
             fin_mess = "Mensaje invalido"
-        return fin_mess
+        self.socket.send(fin_mess.encode())
+
+    def update(self, event):
+        for listener in self.listeners:
+            listener(event)
+
 
 if __name__ == '__main__':
     client = Client(None,None,None)
-    client.connToServer('127.0.0.1')
+    client.connToServer('192.168.1.241')
     client.input_manager()
     client.getSocket().close()
     print("Todo bien")

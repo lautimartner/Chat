@@ -5,35 +5,96 @@ from User import User
 from _thread import *
 
 class Server:
+    """
+    Clase para implementar el servidor, para correr hay que ejecutar esta clase con
+    python3 server.py y cambiar los parametros a desear desde el main
+
+    Atrributes
+    ----------
+    ip : str
+        direccion ip
+    port : int
+        puerto
+    socket : socket
+        socket del servidor
+    conn_users : list
+        lista de usuarios conectados
+    chatroom_list : list
+        lista de salas en el servidor
+    """
     def __init__(self, address):
             self.ip_address, self.port = address
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.conn_users = []
             self.chatroom_list= []
     
-    '''Getters, setters and functionality functions'''
+
     def getAddress(self):
+        """
+        getter para address
+        :return: tuple
+            ip address y puerto
+
+        """
         return self.address
     
     def getSocket(self):
+        """
+        getter para el socket
+        :return: socket
+        """
         return self.socket
     
     def getConnUsers(self):
+        """
+        regresa connected users
+        :return: list
+            lista de usuarios conectados
+        """
         return self.conn_users
     
     def setAddress(self, new_address):
+        """
+        setter para address
+        :param new_address: tuple
+            address
+        :return:  void
+        """
         self.address=new_address
     
     def addConnectedUser(self, user):
+        """
+        agrega usuario conectado
+        :param user: user
+            nuevo ussario conectado
+        :return: void
+        """
         self.conn_users.append(user)
     
     def addChatroom(self, chatroom):
+        """
+        agrega sala de chat
+        :param chatroom:
+            nueva sala de chat
+
+        :return:
+        """
         self.chatroom_list.append(chatroom)
         
     def getChatroom_list(self):
+        """
+        getter para  la lista de salas
+        :return: list
+            sala de chat
+        """
         return self.chatroom_list
     
     def enable(self, list_number):
+        """
+        prende el servidor y conecta la direccion ip a
+        :param list_number:
+        :return:
+        """
         self.socket.bind((self.ip_address, self.port))
         self.socket.listen(list_number)
         print("Listening up to %d clients" %(list_number))
@@ -54,6 +115,7 @@ class Server:
                 message = curr_client_socket.recv(4096)
                 message = message.decode()
                 message_words = message.split()
+                print(message_words[0])
                 curr_user = User(curr_username, curr_status, curr_client_socket)
 
                 if(message_words[0] == "IDENTIFY"):
@@ -151,6 +213,8 @@ class Server:
             print(e)
         except KeyboardInterrupt:
             self.disconnect(curr_client_socket, curr_username)
+        except BrokenPipeError:
+            self.disconnect(curr_client_socket, curr_username)
 
     '''Determines who a message gonna be sent to based on protocol messages'''
     def receiver_det(self, protocol_message, receivers):
@@ -207,5 +271,5 @@ class Server:
         
 if __name__ == '__main__':
     server = Server(("0.0.0.0",int(input("Pon el puerto: "))))
-    server.client_thread_admin(10)
+    server.client_thread_admin(1) #Poner numero de clientes esperados a ser conectados por el servidor, cambiar a gusto
 

@@ -11,7 +11,7 @@ class StartChat(QtWidgets.QApplication):
         self.client = Client(None,None,None)
         self.controller = Controller(self.client)
         self.gui = View(self.controller, self.client)
-        self.client.connToServer("192.168.1.71")
+        self.client.connToServer(None)
         main_thread = threading.Thread(target=self.client.input_manager)
         main_thread.setDaemon(True)
         main_thread.start()
