@@ -12,26 +12,7 @@ class Client:
         self.listeners = []
 
         
-    def getAddress(self):
-        return self.address
-        
-    def getSocket(self):
-        return self.socket
-    
-    def getUser(self):
-        return self.user
-    
-    def setUser(self, user):
-        self.user=user
-    
-    def setAddress(self, new_serv_address):
-        self.address = new_serv_address
-    
-    def addChatroom(self, new_chatroom):
-        self.chatrooms.append(new_chatroom)
-        
-    def getChatroom(self):
-        return self.chatrooms
+
     
     def connToServer(self, ip):
         if ip is None:
@@ -53,8 +34,6 @@ class Client:
         fin_mess = "MESSAGE " + self.concat_list_into_str(message)
         return fin_mess
 
-    def commands(self):
-        str = "Estos son los comandos para usar este chat:"
     def sendPubMessage(self, message):
         split_mess = message.split()
         fin_mess = "PUBLICMESSAGE " + self.concat_list_into_str(split_mess)

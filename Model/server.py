@@ -28,39 +28,6 @@ class Server:
             self.conn_users = []
             self.chatroom_list= []
     
-
-    def getAddress(self):
-        """
-        getter para address
-        :return: tuple
-            ip address y puerto
-
-        """
-        return self.address
-    
-    def getSocket(self):
-        """
-        getter para el socket
-        :return: socket
-        """
-        return self.socket
-    
-    def getConnUsers(self):
-        """
-        regresa connected users
-        :return: list
-            lista de usuarios conectados
-        """
-        return self.conn_users
-    
-    def setAddress(self, new_address):
-        """
-        setter para address
-        :param new_address: tuple
-            address
-        :return:  void
-        """
-        self.address=new_address
     
     def addConnectedUser(self, user):
         """
@@ -81,13 +48,7 @@ class Server:
         """
         self.chatroom_list.append(chatroom)
         
-    def getChatroom_list(self):
-        """
-        getter para  la lista de salas
-        :return: list
-            sala de chat
-        """
-        return self.chatroom_list
+
     
     def enable(self, list_number):
         """
@@ -271,5 +232,5 @@ class Server:
         
 if __name__ == '__main__':
     server = Server(("0.0.0.0",int(input("Pon el puerto: "))))
-    server.client_thread_admin(1) #Poner numero de clientes esperados a ser conectados por el servidor, cambiar a gusto
+    server.client_thread_admin(3) #Poner numero de clientes esperados a ser conectados por el servidor, cambiar a gusto
 

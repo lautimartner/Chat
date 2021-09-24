@@ -23,47 +23,6 @@ class Chatroom:
         self.confirmed_list= []
 
 
-    def getRoomName(self):
-        """
-        Getter para el nombre de la sala
-        :return: str
-            nombre de sala
-        """
-        return self.room_name
-
-    def getOwner(self):
-        """
-        Regresa el usuario dueno
-        :return: user
-            usuario dueno
-        """
-        return self.owner
-
-    def getWaitList(self):
-        """
-        Regresa wait_list
-        :return:  lista de usuarios
-            attributo wait_list
-        """
-        return self.wait_list
-
-    def getConfirmedList(self):
-        """
-        getter de confirmed_list
-        :return: lista de usuarios
-
-        """
-        return self.confirmed_list
-
-    def setRoomName(self, name):
-        """
-        setter para nombre de sala
-        :param name:  str
-            nombre de sala
-        :return: void
-        """
-        self.room_name=name
-
     def addToWaitlist(self,user):
         """
         Agrega usuario a la lista de espera
